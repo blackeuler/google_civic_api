@@ -2,37 +2,56 @@ defmodule GoogleCivicApi.Impl.Representatives do
   @moduledoc """
   Documentation for `GoogleCivicApi`.
   """
-  use HTTPoison.Base
-
-  @google_sys_var "GOOGLE_API_KEY"
 
   @doc """
   Looks up political geography and representative information for a single address.
   ## Examples
 
       iex> GoogleCivicApi.Impl.Representatives.byAddress()
-      :world
+        [ %{
+            locations: [
+            %{
+                address: %{
+                city: "Baltimore",
+                line1: "111 North Calvert Street",
+                state: "MD"
+                }
+            }
+            ],
+            name: "Marilyn Bentley",
+            party: "Democratic Party",
+            phones: ["(410) 333-3733"]
+        }]
 
   """
-  @expected_fields ~w(
-    officials
-    error
-  )
 
-  def process_request_url(url) do
-    ("https://www.googleapis.com/civicinfo/v2/representatives?" <>
-       url <> "&key=#{get_google_api_key()}")
-    |> IO.inspect()
+  @type address ::
+          {city :: String.t(), line1 :: String.t(), state :: String.t(), zip :: String.t()}
+  @type official :: {
+          locations :: [address],
+          phones :: list(String.t()),
+          name :: String.t(),
+          party :: String.t()
+        }
+  @spec by_address(String.t()) :: [official]
+  def by_address(address) do
+    {:ok, %HTTPoison.Response{body: %{"officials" => officials}}} =
+      ("representatives?" <> "address=#{URI.encode(address)}")
+      |> GoogleCivicApi.Impl.Base.get()
+
+    Enum.map(officials, fn x -> filter_(x) end)
   end
 
-  def process_response_body(body) do
-    body
-    |> Jason.decode!()
-    |> Map.take(@expected_fields)
-    |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
+  defp filter_(%{"address" => a, "party" => party, "name" => n, "phones" => p}) do
+    %{
+      locations: Enum.map(a, fn x -> filter_address(x) end),
+      party: party,
+      name: n,
+      phones: p
+    }
   end
 
-  defp get_google_api_key() do
-    System.get_env(@google_sys_var)
+  defp filter_address(%{"city" => c, "line1" => l1, "state" => state, "zip" => _}) do
+    %{address: %{city: c, line1: l1, state: state}}
   end
 end

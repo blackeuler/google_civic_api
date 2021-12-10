@@ -5,17 +5,28 @@ defmodule GoogleCivicApi.Representatives do
   alias GoogleCivicApi.Impl.Representatives
 
 
+
   @doc """
-  Looks up political geography and representative information for a single address.
+  Returns a list of representative's basic information and contact for a given address
   ## Examples
 
-      iex> GoogleCivicApi.Representatives.byAddress()
-      :world
+      iex> GoogleCivicApi.Representatives.byAddress(some_baltimore_addr)
+        [ %{
+            locations: [
+            %{
+                address: %{
+                city: "Baltimore",
+                line1: "111 North Calvert Street",
+                state: "MD"
+                }
+            }
+            ],
+            name: "Marilyn Bentley",
+            party: "Democratic Party",
+            phones: ["(410) 333-3733"]
+        }]
 
   """
-
-  def by_address(address) do
-    Representatives.get("address=#{URI.encode(address)}")
-  end
+  defdelegate by_address(address), to: Representatives
 
 end
