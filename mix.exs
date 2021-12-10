@@ -4,7 +4,7 @@ defmodule GoogleCivicApi.MixProject do
   def project do
     [
       app: :google_civic_api,
-      name: "GoogleCivivApi",
+      name: "GoogleCivicApi",
       version: "0.1.1",
       elixir: "~> 1.13",
       description: description(),
