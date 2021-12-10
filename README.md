@@ -1,6 +1,11 @@
 # GoogleCivicApi
 
-**TODO: Add description**
+This is an API to wrap the Google Civic Information API, I became aware of the 
+google APIs already implemented in Elixir after doing most of this so 
+idk 
+here we are
+
+
 
 ## Installation
 
